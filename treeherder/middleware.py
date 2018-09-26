@@ -4,17 +4,20 @@ import newrelic.agent
 from django.utils.deprecation import MiddlewareMixin
 from whitenoise.middleware import WhiteNoiseMiddleware
 
+# Matches Neutrino's style of hashed filenames, eg:
+#   assets/index.1d85033a.js.gz
+#   assets/2.379789df.css.map.br
+#   assets/fontawesome-webfont.af7ae505.woff2
+IMMUTABLE_FILE_RE = re.compile(r'/assets/.*')
+
 
 class CustomWhiteNoise(WhiteNoiseMiddleware):
-    """Sets long max-age headers for webpack generated files."""
-
-    # Matches webpack's style of chunk filenames. eg:
-    # index.f03882a6258f16fceb70.bundle.js
-    IMMUTABLE_FILE_RE = re.compile(r'\.[a-f0-9]{16,}\.bundle\.(js|css)$')
+    """Sets long max-age headers for Neutrino-generated hashed files."""
 
     def immutable_file_test(self, path, url):
-        """Support webpack bundle filenames when setting long max-age headers."""
-        if self.IMMUTABLE_FILE_RE.search(url):
+        # If the URL matches the Neutrino hashed filename style, it's
+        # safe to tell WhiteNoise that the contents will never change.
+        if IMMUTABLE_FILE_RE.match(url):
             return True
         # Otherwise fall back to the default method, so we catch filenames in the
         # style output by GzipManifestStaticFilesStorage during collectstatic. eg:

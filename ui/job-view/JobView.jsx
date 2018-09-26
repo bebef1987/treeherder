@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { hot } from 'react-hot-loader';
 import { react2angular } from 'react2angular/index.es2015';
 import SplitPane from 'react-split-pane';
 
@@ -324,4 +325,4 @@ JobView.propTypes = {
   $injector: PropTypes.object.isRequired,
 };
 
-treeherder.component('jobView', react2angular(JobView, [], ['$injector']));
+treeherder.component('jobView', react2angular(hot(module)(JobView), [], ['$injector']));
